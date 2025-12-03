@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEIC to JPEG</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#0d6efd">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-180.png">
+
+  <!-- Pico CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@2/css/pico.min.css">
+
+  <style>
+    :root {
+      --pico-font-size: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    #status {
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      color: var(--pico-muted-color);
+    }
+
+    #progress-container {
+      display: none;
+      margin: 1.5rem 0;
+    }
+
+    #progress-container.visible {
+      display: block;
+    }
+
+    #convert-btn, #download-btn, #reset-btn {
+      display: none;
+    }
+
+    #convert-btn.visible, #download-btn.visible, #reset-btn.visible {
+      display: inline-block;
+    }
+
+    #reset-btn {
+      background: none;
+      border: none;
+      color: var(--pico-primary);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>HEIC → JPEG</h1>
+
+    <div class="file-input-wrapper">
+      <button id="select-btn" class="contrast">Select Photos</button>
+      <input type="file" id="file-input" accept="image/heic,image/heif,.heic,.heif" multiple>
+    </div>
+
+    <p id="status">0 photos selected</p>
+
+    <div id="progress-container">
+      <progress id="progress" value="0" max="100"></progress>
+      <p id="progress-text">Converting... 0/0</p>
+    </div>
+
+    <button id="convert-btn">Convert</button>
+    <button id="download-btn">Download ZIP</button>
+    <button id="reset-btn">Convert More</button>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
