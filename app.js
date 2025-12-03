@@ -71,7 +71,8 @@ async function startConversion() {
   }
 
   // Start workers
-  for (let i = 0; i < Math.min(WORKER_COUNT, fileQueue.length); i++) {
+  activeWorkers = Math.min(WORKER_COUNT, fileQueue.length);
+  for (let i = 0; i < activeWorkers; i++) {
     processNextFile(workers[i]);
   }
 }
@@ -85,7 +86,6 @@ async function processNextFile(worker) {
     return;
   }
 
-  activeWorkers++;
   const file = fileQueue.shift();
 
   try {
@@ -118,9 +118,11 @@ function handleWorkerMessage(e) {
 }
 
 function handleWorkerError(e) {
-  console.error('Worker error:', e);
+  console.error('Worker error:', e.message, 'at', e.filename, 'line', e.lineno);
+  const worker = e.target;
   processedCount++;
   updateProgress();
+  processNextFile(worker);
 }
 
 function updateProgress() {
