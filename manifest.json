@@ -2,7 +2,7 @@
   "name": "HEIC to JPEG Converter",
   "short_name": "HEIC→JPEG",
   "description": "Convert HEIC photos to JPEG format",
-  "start_url": "/",
+  "start_url": "/image-converter/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0d6efd",

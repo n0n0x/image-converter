@@ -1,13 +1,13 @@
-const CACHE_NAME = 'heic-converter-v1';
+const CACHE_NAME = 'heic-converter-v2';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/worker.js',
-  '/manifest.json',
-  '/icon-180.png',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/image-converter/',
+  '/image-converter/index.html',
+  '/image-converter/app.js',
+  '/image-converter/worker.js',
+  '/image-converter/manifest.json',
+  '/image-converter/icon-180.png',
+  '/image-converter/icon-192.png',
+  '/image-converter/icon-512.png',
   'https://unpkg.com/@picocss/pico@2/css/pico.min.css',
   'https://esm.sh/heic-to@1.1.0',
   'https://esm.sh/jszip@3.10.1'
