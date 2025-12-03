@@ -1,3 +1,49 @@
+// Console log capture (for iOS debugging)
+const logContent = document.getElementById('log-content');
+const logModal = document.getElementById('log-modal');
+const originalConsole = {
+  log: console.log.bind(console),
+  error: console.error.bind(console),
+  warn: console.warn.bind(console)
+};
+
+function appendLog(type, args) {
+  const timestamp = new Date().toLocaleTimeString();
+  const message = args.map(arg =>
+    typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+  ).join(' ');
+
+  const line = document.createElement('div');
+  line.className = type === 'error' ? 'log-error' : type === 'warn' ? 'log-warn' : '';
+  line.textContent = `[${timestamp}] ${message}`;
+  logContent.appendChild(line);
+  logContent.scrollTop = logContent.scrollHeight;
+}
+
+console.log = (...args) => { originalConsole.log(...args); appendLog('log', args); };
+console.error = (...args) => { originalConsole.error(...args); appendLog('error', args); };
+console.warn = (...args) => { originalConsole.warn(...args); appendLog('warn', args); };
+
+// Capture uncaught errors
+window.onerror = (msg, url, line, col, error) => {
+  console.error(`Uncaught: ${msg} at ${url}:${line}:${col}`, error?.stack || '');
+};
+window.onunhandledrejection = (e) => {
+  console.error('Unhandled promise rejection:', e.reason);
+};
+
+// Log modal controls
+document.getElementById('show-logs').addEventListener('click', (e) => {
+  e.preventDefault();
+  logModal.showModal();
+});
+document.getElementById('close-logs').addEventListener('click', () => logModal.close());
+document.getElementById('clear-logs').addEventListener('click', () => {
+  logContent.innerHTML = '';
+});
+
+console.log('App initialized');
+
 // State
 let selectedFiles = [];
 let convertedBlobs = [];

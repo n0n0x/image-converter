@@ -87,6 +87,63 @@
       cursor: pointer;
       margin-top: 1rem;
     }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+    }
+
+    footer a {
+      color: var(--pico-muted-color);
+    }
+
+    dialog#log-modal {
+      max-width: 90vw;
+      max-height: 80vh;
+    }
+
+    dialog#log-modal article {
+      margin: 0;
+      max-height: 70vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    dialog#log-modal article header {
+      flex-shrink: 0;
+    }
+
+    dialog#log-modal article footer {
+      flex-shrink: 0;
+    }
+
+    #log-content {
+      background: var(--pico-background-color);
+      border: 1px solid var(--pico-muted-border-color);
+      border-radius: 4px;
+      padding: 0.5rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      max-height: 50vh;
+      overflow-y: auto;
+      text-align: left;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    #log-content:empty::before {
+      content: "No logs yet...";
+      color: var(--pico-muted-color);
+    }
+
+    .log-error {
+      color: #dc3545;
+    }
+
+    .log-warn {
+      color: #ffc107;
+    }
   </style>
 </head>
 <body>
@@ -109,6 +166,23 @@
     <button id="download-btn">Download ZIP</button>
     <button id="reset-btn">Convert More</button>
   </main>
+
+  <footer>
+    <a href="#" id="show-logs">Show Logs</a>
+  </footer>
+
+  <dialog id="log-modal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" id="close-logs"></button>
+        <h3>Logs</h3>
+      </header>
+      <div id="log-content"></div>
+      <footer>
+        <button id="clear-logs" class="secondary outline">Clear</button>
+      </footer>
+    </article>
+  </dialog>
 
   <script type="module" src="app.js"></script>
 </body>
