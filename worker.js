@@ -17,6 +17,7 @@ let heicTo = null;
 
 self.onmessage = async (e) => {
   const { arrayBuffer, fileName, quality } = e.data;
+  const startTime = performance.now();
 
   try {
     // Lazy load the library
@@ -31,7 +32,11 @@ self.onmessage = async (e) => {
       quality: quality
     });
 
-    self.postMessage({ blob, fileName });
+    const conversionTime = performance.now() - startTime;
+    // Try to get memory usage (available in some browsers)
+    const memoryUsage = self.performance?.memory?.usedJSHeapSize || null;
+
+    self.postMessage({ blob, fileName, conversionTime, memoryUsage });
   } catch (error) {
     self.postMessage({ error: error.message || String(error), fileName });
   }

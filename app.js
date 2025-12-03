@@ -5,6 +5,8 @@ let workers = [];
 let activeWorkers = 0;
 let fileQueue = [];
 let processedCount = 0;
+let conversionStartTime = 0;
+let conversionTimes = [];
 
 // DOM Elements
 const fileInput = document.getElementById('file-input');
@@ -58,6 +60,8 @@ async function startConversion() {
   convertedBlobs = [];
   processedCount = 0;
   fileQueue = [...selectedFiles];
+  conversionTimes = [];
+  conversionStartTime = performance.now();
 
   // Update UI
   selectBtn.disabled = true;
@@ -103,13 +107,15 @@ async function processNextFile(worker) {
 }
 
 function handleWorkerMessage(e) {
-  const { blob, fileName, error } = e.data;
+  const { blob, fileName, error, conversionTime, memoryUsage } = e.data;
   const worker = e.target;
 
   if (error) {
     console.error('Conversion error for', fileName, error);
   } else if (blob) {
     convertedBlobs.push({ blob, fileName: fileName.replace(/\.heic$/i, '.jpg') });
+    conversionTimes.push(conversionTime);
+    console.log(`[Stats] ${fileName}: ${conversionTime.toFixed(0)}ms${memoryUsage ? `, memory: ${(memoryUsage / 1024 / 1024).toFixed(1)}MB` : ''}`);
   }
 
   processedCount++;
@@ -133,18 +139,45 @@ function updateProgress() {
 }
 
 async function onConversionComplete() {
-  progressText.textContent = `${convertedBlobs.length} of ${selectedFiles.length} converted`;
+  const totalConversionTime = performance.now() - conversionStartTime;
 
-  // Create ZIP
-  const { default: JSZip } = await import('https://esm.sh/jszip@3.10.1');
-  const zip = new JSZip();
-
-  for (const { blob, fileName } of convertedBlobs) {
-    zip.file(fileName, blob);
+  // Log conversion stats
+  if (conversionTimes.length > 0) {
+    const avgTime = conversionTimes.reduce((a, b) => a + b, 0) / conversionTimes.length;
+    const minTime = Math.min(...conversionTimes);
+    const maxTime = Math.max(...conversionTimes);
+    console.log(`[Stats] Conversion complete: ${conversionTimes.length} files in ${(totalConversionTime / 1000).toFixed(2)}s`);
+    console.log(`[Stats] Per-image times - avg: ${avgTime.toFixed(0)}ms, min: ${minTime.toFixed(0)}ms, max: ${maxTime.toFixed(0)}ms`);
   }
 
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  // Show ZIP creation status
+  progressText.textContent = 'Creating ZIP...';
+  progress.removeAttribute('value'); // Makes it indeterminate
+
+  // Create ZIP using fflate (much faster than JSZip)
+  const zipStartTime = performance.now();
+  const { zipSync } = await import('https://esm.sh/fflate@0.8.2');
+
+  // Convert blobs to Uint8Arrays for fflate
+  const files = {};
+  const totalInputSize = convertedBlobs.reduce((sum, { blob }) => sum + blob.size, 0);
+
+  for (const { blob, fileName } of convertedBlobs) {
+    const arrayBuffer = await blob.arrayBuffer();
+    // level 0 = STORE (no compression)
+    files[fileName] = [new Uint8Array(arrayBuffer), { level: 0 }];
+  }
+
+  const zipped = zipSync(files);
+  const zipBlob = new Blob([zipped], { type: 'application/zip' });
+
+  const zipTime = performance.now() - zipStartTime;
   const sizeMB = (zipBlob.size / 1024 / 1024).toFixed(1);
+
+  // Log ZIP stats
+  console.log(`[Stats] ZIP created in ${(zipTime / 1000).toFixed(2)}s (fflate)`);
+  console.log(`[Stats] ZIP size: ${sizeMB}MB (input: ${(totalInputSize / 1024 / 1024).toFixed(1)}MB, compression: STORE/none)`);
+  console.log(`[Stats] Total time: ${((performance.now() - conversionStartTime) / 1000).toFixed(2)}s`);
 
   // Update UI
   progressContainer.classList.remove('visible');
